@@ -7,6 +7,8 @@ use data::Data;
 
 use self::hash::Hashable;
 
+
+
 #[derive(Debug)]
 pub struct HashTable<K, V> {
     pub capacity: u32,
@@ -34,6 +36,7 @@ where
         }
     }
 
+    //Insert function
     pub fn insert(&mut self, data: Data<K, V>) -> Result<()> {
         let index = self.compress(data.key.hash());
 
@@ -56,6 +59,8 @@ where
         Ok(())
     }
 
+
+    //Delete function
     pub fn delete(&mut self, key: K) -> Result<()> {
         let index = self.compress(key.hash());
 
@@ -66,7 +71,7 @@ where
                         self.table[index] = None;
                         Ok(())
                     } else {
-                        bail!("Failed to find key in table")
+                        bail!("Failed to find the used  key")
                     }
                 } else {
                     let mut key_found = false;
@@ -79,14 +84,16 @@ where
                     if key_found {
                         Ok(())
                     } else {
-                        bail!("Failed to find key in table")
+                        bail!("Failed to find the used  key")
                     }
                 }
             },
-            None => bail!("Failed to find key in table")
+            None => bail!("Failed to find the used  key")
         }
     }
 
+
+    //get function
     pub fn get(&mut self, key: K) -> Result<V> {
         let index = self.compress(key.hash());
         let mut value: Option<V> = None;
@@ -103,30 +110,34 @@ where
         }
         match value {
             Some(_value) => Ok(_value),
-            None => bail!("Failed to find key in table"),
+            None => bail!("Failed to find the used key"),
         }
     }
 
+
+    //Print function 
     pub fn print(&self) -> Result<()> {
-        let mut msg = format!("\n========== Table ==========\n");
+        let mut output = format!("\n========== Table ==========\n");
         for _bucket in &self.table {
             match _bucket { 
                 Some(_vec) => {
                     let key = &_vec[0].key;
-                    msg = format!("{}Key: {:?}, ", msg, key);
+                    output = format!("{}Key: {:?}, ", output, key);
                     for _data in _vec {
                         let value = &_data.value;
-                        msg = format!("{}Value: {:#?}, ", msg, value);
+                        output = format!("{}Value: {:#?}, ", output, value);
                     } 
-                    msg = format!("{}\n", msg);
+                    output = format!("{}\n", output);
                 },
-                None =>  msg = format!("{}-----\n", msg),
+                None =>  output = format!("{}-----\n", output),
             }
         }
-        println!("{}", msg);
+        println!("{}", output);
         Ok(())
     }
 
+
+    //Resize the table
     fn resize(&mut self) -> Result<()> {
         self.capacity *= 2;
         let mut table = HashTable::<K, V>::new(self.capacity);
@@ -135,8 +146,7 @@ where
                 Some(_vec) => {
                     for _data in _vec {
                         let data = _data.clone();
-                        table.insert(data)
-                            .with_context(|| format!("Failed to insert data into new table"))?;
+                        table.insert(data).with_context(|| format!("Failed to insert data into new table"))?;
                     }
                 },
                 None => continue
@@ -149,4 +159,4 @@ where
     fn compress(&self, hash: u32) -> usize {
         (hash % self.capacity) as usize
     }
-}
+} 

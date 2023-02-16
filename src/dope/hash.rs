@@ -1,8 +1,10 @@
+
+//Hashing algorithms for different sorts of data
+
 pub trait Hashable {
     fn hash(&self) -> u32;
 }
 
-/// CRC hashing
 impl Hashable for String {
     fn hash(&self) -> u32 {
         let mut hash: u32 = 0;
